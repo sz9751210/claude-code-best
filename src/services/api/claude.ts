@@ -24,6 +24,7 @@ import {
   getAPIProvider,
   isFirstPartyAnthropicBaseUrl,
 } from 'src/utils/model/providers.js'
+import { queryGeminiWeb } from 'src/services/geminiWeb/queryGeminiWeb.js'
 import {
   getAttributionHeader,
   getCLISyspromptPrefix,
@@ -1012,6 +1013,19 @@ async function* queryModel(
   StreamEvent | AssistantMessage | SystemAPIErrorMessage,
   void
 > {
+  if (getAPIProvider() === 'geminiWeb') {
+    if (signal.aborted) {
+      throw new APIUserAbortError()
+    }
+
+    const assistantMessage = await queryGeminiWeb({
+      messages,
+      signal,
+    })
+    yield assistantMessage
+    return
+  }
+
   // Check cheap conditions first — the off-switch await blocks on GrowthBook
   // init (~10ms). For non-Opus models (haiku, sonnet) this skips the await
   // entirely. Subscribers don't hit this path at all.

@@ -67,6 +67,12 @@ bun run build
 
 如果遇到 bug 请直接提一个 issues, 我们优先解决
 
+## Web Gemini 使用说明
+
+可参考这份说明启用 Web Gemini provider（Playwright 驱动），可直接在 `bun run dev` 的互动式 REPL 中使用：
+
+- [docs/gemini-web/README.md](docs/gemini-web/README.md)
+
 ## VS Code 调试
 
 TUI (REPL) 模式需要真实终端，无法直接通过 VS Code launch 启动调试。使用 **attach 模式**：

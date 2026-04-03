@@ -147,6 +147,7 @@ import { areMcpConfigsAllowedWithEnterpriseMcpConfig, dedupClaudeAiMcpServers, d
 import { excludeCommandsByServer, excludeResourcesByServer } from 'src/services/mcp/utils.js';
 import { isXaaEnabled } from 'src/services/mcp/xaaIdpLogin.js';
 import { getRelevantTips } from 'src/services/tips/tipRegistry.js';
+import { assertGeminiWebModeSupported } from 'src/services/geminiWeb/modeGuard.js';
 import { logContextMetrics } from 'src/utils/api.js';
 import { CLAUDE_IN_CHROME_MCP_SERVER_NAME, isClaudeInChromeMCPServer } from 'src/utils/claudeInChrome/common.js';
 import { registerCleanup } from 'src/utils/cleanupRegistry.js';
@@ -166,6 +167,7 @@ import { type ProcessedResume, processResumedConversation } from 'src/utils/sess
 import { parseSettingSourcesFlag } from 'src/utils/settings/constants.js';
 import { plural } from 'src/utils/stringUtils.js';
 import { type ChannelEntry, getInitialMainLoopModel, getIsNonInteractiveSession, getSdkBetas, getSessionId, getUserMsgOptIn, setAllowedChannels, setAllowedSettingSources, setChromeFlagOverride, setClientType, setCwdState, setDirectConnectServerUrl, setFlagSettingsPath, setInitialMainLoopModel, setInlinePlugins, setIsInteractive, setKairosActive, setOriginalCwd, setQuestionPreviewFormat, setSdkBetas, setSessionBypassPermissionsMode, setSessionPersistenceDisabled, setSessionSource, setUserMsgOptIn, switchSession } from './bootstrap/state.js';
+import { getAPIProvider } from './utils/model/providers.js';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER') ? require('./utils/permissions/autoModeState.js') as typeof import('./utils/permissions/autoModeState.js') : null;
@@ -1329,6 +1331,10 @@ async function run(): Promise<CommanderCommand> {
 
     // Get isNonInteractiveSession from state (was set before init())
     const isNonInteractiveSession = getIsNonInteractiveSession();
+    assertGeminiWebModeSupported({
+      apiProvider: getAPIProvider(),
+      isNonInteractiveSession
+    });
 
     // Validate that fallback model is different from main model
     if (fallbackModel && options.model && fallbackModel === options.model) {

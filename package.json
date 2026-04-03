@@ -135,6 +135,7 @@
     "modifiers-napi": "workspace:*",
     "p-map": "^7.0.4",
     "picomatch": "^4.0.4",
+    "playwright": "^1.59.1",
     "plist": "^3.1.0",
     "proper-lockfile": "^4.1.2",
     "qrcode": "^1.5.4",

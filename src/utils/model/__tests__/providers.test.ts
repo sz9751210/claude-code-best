@@ -6,6 +6,8 @@ describe("getAPIProvider", () => {
     "CLAUDE_CODE_USE_BEDROCK",
     "CLAUDE_CODE_USE_VERTEX",
     "CLAUDE_CODE_USE_FOUNDRY",
+    "CLAUDE_CODE_USE_GEMINI_WEB",
+    "ANTHROPIC_API_KEY",
   ] as const;
   const savedEnv: Record<string, string | undefined> = {};
 
@@ -45,6 +47,11 @@ describe("getAPIProvider", () => {
     expect(getAPIProvider()).toBe("foundry");
   });
 
+  test('returns "geminiWeb" when CLAUDE_CODE_USE_GEMINI_WEB is set', () => {
+    process.env.CLAUDE_CODE_USE_GEMINI_WEB = "1";
+    expect(getAPIProvider()).toBe("geminiWeb");
+  });
+
   test("bedrock takes precedence over vertex", () => {
     process.env.CLAUDE_CODE_USE_BEDROCK = "1";
     process.env.CLAUDE_CODE_USE_VERTEX = "1";
@@ -56,6 +63,12 @@ describe("getAPIProvider", () => {
     process.env.CLAUDE_CODE_USE_VERTEX = "1";
     process.env.CLAUDE_CODE_USE_FOUNDRY = "1";
     expect(getAPIProvider()).toBe("bedrock");
+  });
+
+  test("foundry takes precedence over geminiWeb", () => {
+    process.env.CLAUDE_CODE_USE_FOUNDRY = "1";
+    process.env.CLAUDE_CODE_USE_GEMINI_WEB = "1";
+    expect(getAPIProvider()).toBe("foundry");
   });
 
   test('"true" is truthy', () => {
@@ -70,6 +83,18 @@ describe("getAPIProvider", () => {
 
   test('empty string is not truthy', () => {
     process.env.CLAUDE_CODE_USE_BEDROCK = "";
+    expect(getAPIProvider()).toBe("firstParty");
+  });
+
+  test("routes to geminiWeb even when ANTHROPIC_API_KEY is set", () => {
+    process.env.CLAUDE_CODE_USE_GEMINI_WEB = "1";
+    process.env.ANTHROPIC_API_KEY = "sk-invalid-test";
+    expect(getAPIProvider()).toBe("geminiWeb");
+  });
+
+  test("routes to firstParty when gemini flag is unset, even with API key", () => {
+    delete process.env.CLAUDE_CODE_USE_GEMINI_WEB;
+    process.env.ANTHROPIC_API_KEY = "sk-invalid-test";
     expect(getAPIProvider()).toBe("firstParty");
   });
 });
